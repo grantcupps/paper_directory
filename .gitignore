@@ -1,0 +1,7 @@
+photos
+*.jpg
+*.pdf
+.DS_Store
+*.xlsx
+*.csv
+*.gem

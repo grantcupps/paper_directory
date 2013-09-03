@@ -1,0 +1,218 @@
+#!/usr/bin/env ruby
+
+require "prawn"
+require "csv"
+require "optparse"
+
+options = {}
+
+option_parser = OptionParser.new do |opts|
+
+	opts.on("-s CSV_FILE") do |file|
+		options[:csv] = file
+	end
+
+	options[:photos] = Dir.getwd + "/photos"
+	opts.on("-p [PHOTO_DIRECTORY]") do |directory|
+		options[:photos] = Dir.getwd + '/' + directory
+	end
+
+end
+
+option_parser.parse!
+puts options.inspect
+
+contacts = CSV.read(Dir.getwd + "/" + options[:csv])
+contacts.shift # Get rid of the header
+
+Prawn::Document.generate(Dir.getwd + "/directory.pdf", :page_size => [396, 612], :top_margin => 29, :right_margin => 32, :bottom_margin => 22, :left_margin => 36) do |pdf|
+
+	contacts.each do |contact|
+		pdf.font "Helvetica",  :style => :bold
+
+		household_head = contact[0]
+		home_phone = contact[5]
+		street_address = contact[1]
+		city = contact[2]
+		state = contact[3]
+		zip_code = contact[4]
+
+		household_head_cell = contact[6]
+		household_head_birthdate = contact[7]
+		household_head_occupation = contact[8]
+		household_head_interests = contact[9]
+		household_head_photo = contact[24]
+
+		spouse = contact[10]
+		spouse_cell = contact[11]
+		spouse_birthdate = contact[12]
+		spouse_occupation = contact[13]
+		spouse_interests = contact[14]
+		spouse_photo = contact[25]
+
+		child_1 = contact[15]
+		child_1_birthdate = contact[16]
+		child_1_interests = contact[17]
+		child_1_photo = contact[26]
+
+		child_2 = contact[18]
+		child_2_birthdate = contact[19]
+		child_2_interests = contact[20]
+		child_2_photo = contact[27]
+
+		child_3 = contact[21]
+		child_3_birthdate = contact[22]
+		child_3_interests = contact[23]
+		child_3_photo = contact[28]
+
+		if home_phone
+			pdf.font_size 16
+			pdf.text_box home_phone, :at => [0,560], :height => 16, :width => 120, :align => :left 
+		end
+
+		pdf.font_size 21
+		pdf.text_box household_head, :at => [120,562], :height => 21, :width => 218, :align => :right 
+		pdf.stroke_horizontal_line 0, 338, :at => 520
+
+		pdf.font "Helvetica",  :style => :normal
+		pdf.font_size 12
+		pdf.text_box "#{street_address} - #{city}, #{state} #{zip_code}", :at => [120,538], :height => 12, :width => 218, :align => :right 
+
+		if(spouse)
+			pdf.font "Helvetica",  :style => :bold
+			pdf.font_size 14
+			pdf.text_box household_head, :at => [30,350], :height => 14, :width => 120, :align => :center 
+			pdf.text_box spouse, :at => [186,350], :height => 14, :width => 120, :align => :center
+
+			pdf.font "Helvetica",  :style => :normal
+			pdf.font_size 10
+			
+			pdf.text_box household_head_cell ? household_head_cell : "N/A", :at => [30,334], :height => 10, :width => 120, :align => :center 
+			pdf.text_box spouse_cell ? spouse_cell : "N/A", :at => [186,334], :height => 10, :width => 120, :align => :center
+
+			pdf.text_box household_head_birthdate ? household_head_birthdate : "N/A", :at => [30,323], :height => 10, :width => 120, :align => :center 
+			pdf.text_box spouse_birthdate ? spouse_birthdate : "N/A", :at => [186,323], :height => 10, :width => 120, :align => :center
+
+			pdf.text_box household_head_occupation ? household_head_occupation : "N/A", :at => [30,311], :height => 10, :width => 120, :align => :center 
+			pdf.text_box spouse_occupation ? spouse_occupation : "N/A", :at => [186,311], :height => 10, :width => 120, :align => :center
+
+			pdf.text_box household_head_interests ? household_head_interests : "" , :at => [30,300], :height => 22, :width => 120, :align => :center
+			pdf.text_box spouse_interests ? spouse_interests : "", :at => [186,300], :height => 22, :width => 120, :align => :center
+
+			pdf.bounding_box([33, 500], :width => 113, :height => 140) do
+				pdf.image household_head_photo ? options[:photos] + "/" + household_head_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [113, 140]
+				pdf.stroke_bounds
+			end
+
+			pdf.bounding_box([189, 500], :width => 113, :height => 140) do
+				pdf.image spouse_photo ? options[:photos] + "/" + spouse_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [113, 140]
+				pdf.stroke_bounds
+			end
+
+		else
+
+			pdf.bounding_box([110, 500], :width => 113, :height => 140) do
+				pdf.image household_head_photo ? options[:photos] + "/" + household_head_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [113, 140]
+				pdf.stroke_bounds
+			end
+
+
+			pdf.font "Helvetica",  :style => :bold
+			pdf.font_size 14
+			pdf.text_box household_head, :at => [92,350], :height => 14, :width => 150, :align => :center 
+
+			pdf.font "Helvetica",  :style => :normal
+			pdf.font_size 10
+			
+			pdf.text_box household_head_cell ? household_head_cell : "N/A", :at => [92,334], :height => 10, :width => 150, :align => :center 
+			pdf.text_box household_head_birthdate ? household_head_birthdate : "N/A", :at => [92,323], :height => 10, :width => 150, :align => :center 
+			pdf.text_box household_head_occupation ? household_head_occupation : "N/A", :at => [92,311], :height => 10, :width => 150, :align => :center 
+			pdf.text_box household_head_interests ? household_head_interests : "" , :at => [92,300], :height => 22, :width => 150, :align => :center
+
+		end
+
+		if(child_1 && !child_2 && !child_3)
+			pdf.font "Helvetica",  :style => :bold
+			pdf.font_size 14
+			pdf.text_box child_1, :at => [107,100], :height => 14, :width => 113, :align => :center 
+
+			pdf.font "Helvetica",  :style => :normal
+			pdf.font_size 10
+			
+			pdf.text_box child_1_birthdate ? child_1_birthdate : "N/A", :at => [107,84], :height => 10, :width => 113, :align => :center 
+			pdf.text_box child_1_interests ? child_1_interests : "" , :at => [107,73], :height => 22, :width => 113, :align => :center
+
+			pdf.bounding_box([107, 250], :width => 113, :height => 140) do
+				pdf.image child_1_photo ? options[:photos] + "/" + child_1_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [113, 140]
+				pdf.stroke_bounds
+			end
+		end
+
+		if(child_1 && child_2 && !child_3)
+			pdf.font "Helvetica",  :style => :bold
+			pdf.font_size 14
+			pdf.text_box child_1, :at => [30,100], :height => 14, :width => 113, :align => :center 
+			pdf.text_box child_2, :at => [186,100], :height => 14, :width => 113, :align => :center 
+
+			pdf.font "Helvetica",  :style => :normal
+			pdf.font_size 10
+			
+			pdf.text_box child_1_birthdate ? child_1_birthdate : "N/A", :at => [30,84], :height => 10, :width => 113, :align => :center 
+			pdf.text_box child_1_interests ? child_1_interests : "" , :at => [30,73], :height => 22, :width => 113, :align => :center
+
+			pdf.text_box child_2_birthdate ? child_2_birthdate : "N/A", :at => [186,84], :height => 10, :width => 113, :align => :center 
+			pdf.text_box child_2_interests ? child_2_interests : "" , :at => [186,73], :height => 22, :width => 113, :align => :center
+
+			pdf.bounding_box([30, 250], :width => 113, :height => 140) do
+				pdf.image child_1_photo ? options[:photos] + "/" + child_1_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [113, 140]
+				pdf.stroke_bounds
+			end
+
+			pdf.bounding_box([186, 250], :width => 113, :height => 140) do
+				pdf.image child_2_photo ? options[:photos] + "/" + child_2_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [113, 140]
+				pdf.stroke_bounds
+			end
+		end
+
+
+		if(child_1 && child_2 && child_3)
+			pdf.font "Helvetica",  :style => :bold
+			pdf.font_size 14
+			pdf.text_box child_1, :at => [0,100], :height => 14, :width => 104, :align => :center 
+			pdf.text_box child_2, :at => [112,100], :height => 14, :width => 104, :align => :center 
+			pdf.text_box child_3, :at => [224,100], :height => 14, :width => 104, :align => :center 
+
+			pdf.font "Helvetica",  :style => :normal
+			pdf.font_size 10
+			
+			pdf.text_box child_1_birthdate ? child_1_birthdate : "N/A", :at => [0,84], :height => 10, :width => 104, :align => :center 
+			pdf.text_box child_1_interests ? child_1_interests : "" , :at => [0,73], :height => 22, :width => 104, :align => :center
+
+			pdf.text_box child_2_birthdate ? child_2_birthdate : "N/A", :at => [112,84], :height => 10, :width => 104, :align => :center 
+			pdf.text_box child_2_interests ? child_2_interests : "" , :at => [112,73], :height => 22, :width => 104, :align => :center
+
+			pdf.text_box child_3_birthdate ? child_3_birthdate : "N/A", :at => [224,84], :height => 10, :width => 104, :align => :center 
+			pdf.text_box child_3_interests ? child_3_interests : "" , :at => [224,73], :height => 22, :width => 104, :align => :center
+
+			pdf.bounding_box([0, 238], :width => 104, :height => 128) do
+				pdf.image child_1_photo ? options[:photos] + "/" + child_1_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [104, 128]
+				pdf.stroke_bounds
+			end
+
+			pdf.bounding_box([112, 238], :width => 104, :height => 128) do
+				pdf.image child_2_photo ? options[:photos] + "/" + child_2_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [104, 128]
+				pdf.stroke_bounds
+			end
+
+			pdf.bounding_box([224, 238], :width => 104, :height => 128) do
+				pdf.image child_3_photo ? options[:photos] + "/" + child_3_photo : options[:photos] + "/Z - Silhouette.jpg", :fit => [104, 128]
+				pdf.stroke_bounds
+			end
+		end
+
+
+		pdf.start_new_page
+	end
+
+end
+
