@@ -1,4 +1,4 @@
-church_directory
+Paper Directory
 ================
 
-Using Ruby and CSS to generate a printed Church directory from a CSV file
+Using Ruby and CSS to generate a printed directory from a CSV file
