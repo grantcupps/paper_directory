@@ -8,7 +8,7 @@ Installation
 
 On a Unix (Mac OS X/Linux) system, run the following:
 ```
-wget https://github.com/grantcupps/paper_directory/releases/download/1.0.0/cocdir-1.0.0.gem
+wget https://github.com/grantcupps/paper_directory/releases/download/1.1.0/cocdir-1.1.0.gem
 gem install cocdir
 ```
 
